@@ -8,8 +8,9 @@
 
 import UIKit
 
-struct ContactModel {
-    var id: Int
-    var name: String
-    var phone: String
+class ContactModel {
+    var avatar: Data?
+    var name: String?
+    var phone: String?
+    
 }

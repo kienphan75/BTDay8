@@ -10,36 +10,35 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    var contacts : [Contacts]?
+    // MARK: - Constanst
+    var contacts : [ContactModel]?
 
+    // MARK: - outlet
+    @IBOutlet weak var viewHeader: UIView!
     @IBOutlet weak var tableView: UITableView!
     
+    // MARK: - action
     @IBAction func actionAdd(_ sender: Any) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let controller = storyboard.instantiateViewController(withIdentifier: "AddViewController") as!  AddViewController
+        controller.delegate = self
         navigationController?.pushViewController(controller, animated: true)
-        
     }
     
+    // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.tableHeaderView = viewHeader
+        tableView.tableHeaderView?.layoutIfNeeded()
+        
         tableView.register(UINib(nibName: "TableViewCell", bundle: nil), forCellReuseIdentifier: "TableViewCell")
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let context = appDelegate.persistentContainer.viewContext
-        contacts =  DatabaseManager.instanle.getAllContacts(context: context)
+        contacts =  DatabaseManager.instanle.getAllContacts()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let context = appDelegate.persistentContainer.viewContext
-        contacts =  DatabaseManager.instanle.getAllContacts(context: context )
-        tableView.reloadData()
-    }
-
-
 }
+
 extension ViewController: UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let count = contacts?.count{
@@ -63,8 +62,18 @@ extension ViewController: UITableViewDelegate{
         cell.lbContact.text = contacts?[indexPath.row].phone
         return cell
     }
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 100
     }
 }
 
+
+// MARK: - Receive and update table
+extension ViewController: UpdateDelegate{
+    func update() {
+        contacts?.removeAll()
+        contacts =  DatabaseManager.instanle.getAllContacts()
+        tableView.reloadData()
+    }
+}
